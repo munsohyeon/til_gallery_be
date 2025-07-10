@@ -21,7 +21,7 @@ public class CartController {
     private final CartService cartService;
 
     @PostMapping
-    public ResponseEntity<?> addToCart(HttpServletRequest httpReq, @RequestBody CartPostReq req) {
+    public ResponseEntity<?> save(HttpServletRequest httpReq, @RequestBody CartPostReq req) {
         log.info("req: {}", req);
         int logginedMemberId = (int) HttpUtils.getSessionValue(httpReq, AccountConstants.MEMBER_ID_NAME);
         req.setMemberId(logginedMemberId);
@@ -30,19 +30,25 @@ public class CartController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CartGetRes>> findAllWithItemByMemberId(HttpServletRequest httpReq) {
+    public ResponseEntity<List<CartGetRes>> getCart(HttpServletRequest httpReq) {
         int loggedInMemberId = (int) HttpUtils.getSessionValue(httpReq, AccountConstants.MEMBER_ID_NAME);
         log.info("loggedInMemberId: {}", loggedInMemberId);
         List<CartGetRes> result = cartService.findAll(loggedInMemberId);
         return ResponseEntity.ok(result);
     }
 
-    @DeleteMapping
-    public ResponseEntity<?> deleteByMemberIdAndItemId(HttpServletRequest httpReq, @ModelAttribute CartDeleteReq req) {
+    @DeleteMapping("/{cartId}")
+    public ResponseEntity<?> deleteMemberItem(HttpServletRequest httpReq, @PathVariable int cartId) {
         int loggedInMemberId = (int) HttpUtils.getSessionValue(httpReq, AccountConstants.MEMBER_ID_NAME);
-        log.info("loggedInMemberId: {}, deleteRequest: {}", loggedInMemberId, req);
-        req.setMemberId(loggedInMemberId);
+        CartDeleteReq req = new CartDeleteReq(cartId, loggedInMemberId);
         int result = cartService.remove(req);
+        return ResponseEntity.ok(result);
+    }
+
+    @DeleteMapping
+    public ResponseEntity<?> deleteMemberCart(HttpServletRequest httpReq) {
+        int logginedMemberId = (int)HttpUtils.getSessionValue(httpReq, AccountConstants.MEMBER_ID_NAME);
+        int result = cartService.removeAll(logginedMemberId);
         return ResponseEntity.ok(result);
     }
 
