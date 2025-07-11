@@ -1,10 +1,9 @@
 package kr.co.wikibook.gallery.order;
 
+import kr.co.wikibook.gallery.cart.CartMapper;
 import kr.co.wikibook.gallery.item.ItemMapper;
 import kr.co.wikibook.gallery.item.model.ItemGetRes;
-import kr.co.wikibook.gallery.order.model.OrderItemPostDto;
-import kr.co.wikibook.gallery.order.model.OrderPostDto;
-import kr.co.wikibook.gallery.order.model.OrderPostReq;
+import kr.co.wikibook.gallery.order.model.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,6 +19,7 @@ public class OrderService {
     private final OrderMapper orderMapper;
     private final OrderItemMapper orderItemMapper;
     private final ItemMapper itemMapper;
+    private final CartMapper cartMapper;
 
     @Transactional //
     public int saveOrder(OrderPostReq req, int loggindeMemberId) {
@@ -46,15 +46,30 @@ public class OrderService {
                 .amount(result)
                 .build();
         log.info("before-dto = {}", dto);
-        int orderId = orderMapper.save(dto);
+        int amount = orderMapper.save(dto);
         log.info("after-dto = {}", dto);
 
         // OrderItemPostDto 객체화 하시면서 데이터 넣어주세요.
         OrderItemPostDto orderItemPostDto = new OrderItemPostDto(dto.getOrderId(), req.getItemIds());
         log.info("orderItemPostDto = {}", orderItemPostDto);
         orderItemMapper.save(orderItemPostDto);
+
+        cartMapper.deleteByMemberId(loggindeMemberId);
         return 1;
     }
+//    public List<OrderGetRes> getOrderAll(int id) {
+//        return OrderMapper.findAllByMemberIdOrderByIdDesc(id);
+//    }
+    public List<OrderGetRes> findAllByMemberId(int memberId) {
+        return orderMapper.findAllByMemberIdOrderByIdDesc(memberId);
+    }
+
+    public OrderDetailGetRes detail(OrderDetailGetReq req) {
+        OrderDetailGetRes result = orderMapper.findByOrderIdAndMemberId(req);
+        log.info("result={}", result);
+        return result;
+    }
+
 }
 
 
