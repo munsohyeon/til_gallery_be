@@ -1,5 +1,8 @@
 package kr.co.wikibook.gallery.order;
 
+import jakarta.servlet.http.HttpServletRequest;
+import kr.co.wikibook.gallery.account.etc.AccountConstants;
+import kr.co.wikibook.gallery.common.util.HttpUtils;
 import kr.co.wikibook.gallery.order.model.OrderPostReq;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,8 +21,10 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping
-    ResponseEntity<?> add(@RequestBody OrderPostReq req) {
+    ResponseEntity<?> add(HttpServletRequest httpReq, @RequestBody OrderPostReq req) {
         log.info("req: {}", req);
+        int loggindeMemberId = (int) HttpUtils.getSessionValue(httpReq, AccountConstants.MEMBER_ID_NAME);
+        int result = orderService.saveOrder(req, loggindeMemberId);
         return null;
     }
 }

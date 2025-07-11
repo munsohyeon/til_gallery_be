@@ -1,5 +1,6 @@
 package kr.co.wikibook.gallery.order.model;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 
